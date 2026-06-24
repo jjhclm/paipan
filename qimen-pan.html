@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>奇门遁甲排盘</title>
+<style>
+:root{
+  --bg:#f5f0e8;--card:#fff;--text:#4a3c2a;--muted:#8b7d6b;--accent:#a08050;
+  --gan:#c0392b;--zhi:#2980b9;--star:#e67e22;--door:#27ae60;--god:#5a3c20;--cs:#8e44ad;
+  --menpo:#e74c3c;--rumu:#27ae60;--jixing:#9b59b6;--both:#2980b9;--xunkong:#999;
+  --wang-bg:#ffe5e5;--wang-c:#c0392b;--xiang-bg:#fff3e0;--xiang-c:#e67e22;
+  --xiu-bg:#e8f5e9;--xiu-c:#27ae60;--qiu-bg:#e3f2fd;--qiu-c:#2980b9;--si-bg:#f3e5f5;--si-c:#8e44ad;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:"Microsoft YaHei","PingFang SC",sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+.container { max-width:640px; margin:0 auto; padding:12px; }
+
+.header { text-align:center; padding:14px 0; }
+.header h1 { font-size:22px; color:var(--accent); letter-spacing:6px; font-weight:600; }
+.header .sub { font-size:12px; color:var(--muted); margin-top:4px; }
+
+.input-card { background:var(--card); border-radius:10px; padding:14px; margin-bottom:10px; box-shadow:0 2px 6px rgba(0,0,0,0.06); }
+.input-row { display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; }
+.input-group { display:flex; flex-direction:column; gap:3px; flex:1; min-width:90px; }
+.input-group label { font-size:12px; color:var(--muted); font-weight:500; }
+.input-group input, .input-group select { padding:7px 9px; border:1px solid #d5c8b5; border-radius:6px; background:#faf8f3; color:var(--text); font-size:14px; outline:none; }
+.input-group input:focus, .input-group select:focus { border-color:var(--accent); }
+.btn { padding:9px 22px; background:var(--accent); color:#fff; border:none; border-radius:6px; font-size:15px; cursor:pointer; font-weight:bold; letter-spacing:2px; transition:all .2s; }
+.btn:hover { background:#8b6f47; transform:translateY(-1px); }
+.btn-now { padding:7px 12px; background:#e8e0d5; color:var(--muted); border:1px solid #d5c8b5; border-radius:6px; font-size:13px; cursor:pointer; }
+
+.sizhu-card { background:var(--card); border-radius:10px; padding:14px; margin-bottom:10px; box-shadow:0 2px 6px rgba(0,0,0,0.06); }
+.sizhu-table { width:100%; border-collapse:collapse; font-size:14px; }
+.sizhu-table th, .sizhu-table td { padding:5px 6px; text-align:center; border:1px solid #e8e0d5; }
+.sizhu-table th { background:#faf5ed; color:var(--accent); font-weight:500; font-size:12px; }
+.sizhu-table .gan { color:var(--gan); font-size:18px; font-weight:bold; }
+.sizhu-table .zhi { color:var(--zhi); font-size:18px; font-weight:bold; }
+.sizhu-table .label { color:var(--muted); font-size:11px; }
+.lunar-info { margin-top:6px; font-size:12px; color:var(--muted); text-align:center; }
+
+.info-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+.info-tag { background:var(--card); border-radius:8px; padding:7px 10px; box-shadow:0 2px 6px rgba(0,0,0,0.06); font-size:12px; line-height:1.3; }
+.info-tag .label { color:var(--muted); font-size:11px; }
+.info-tag .value { color:var(--text); font-weight:600; font-size:13px; }
+.info-tag .fuyin { color:var(--gan); font-weight:bold; }
+.info-tag .si-hai { display:inline-block; width:14px; height:14px; border-radius:50%; text-align:center; line-height:14px; font-size:10px; color:#fff; margin-left:2px; }
+.info-tag .si-hai.menpo { background:var(--menpo); }
+.info-tag .si-hai.rumu { background:var(--rumu); }
+.info-tag .si-hai.jixing { background:var(--jixing); }
+.info-tag .si-hai.both { background:var(--both); }
+
+.collapse-btn { background:var(--card); border-radius:8px; padding:9px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.06); cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--muted); margin-bottom:10px; user-select:none; }
+.collapse-btn::after { content:"▼"; font-size:10px; transition:transform .3s; }
+.collapse-btn.open::after { transform:rotate(180deg); }
+.collapse-content { display:none; background:var(--card); border-radius:8px; padding:12px; margin-bottom:10px; box-shadow:0 2px 6px rgba(0,0,0,0.06); font-size:13px; line-height:1.8; }
+.collapse-content.open { display:block; }
+
+.legend { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin:8px 0; font-size:11px; color:var(--muted); }
+.legend-item { display:flex; align-items:center; gap:3px; }
+
+.grid-container { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; max-width:100%; margin:10px auto; }
+.cell { background:var(--card); border-radius:8px; border:1px solid #e0d5c5; display:flex; flex-direction:column; align-items:stretch; position:relative; transition:all .2s; min-height:110px; overflow:hidden; }
+.cell:hover { border-color:var(--accent); box-shadow:0 2px 8px rgba(160,128,80,0.15); }
+.cell.highlight { border-color:var(--gan); border-width:2px; box-shadow:0 0 10px rgba(192,57,43,0.2); }
+.cell.gan-fuyin { background:#fff8f0; }
+.cell.xing-fuyin { background:#f0f8ff; }
+.cell.men-fuyin { background:#f0fff0; }
+
+.cell-god { text-align:center; font-size:14px; font-weight:bold; color:var(--god); padding:3px 2px 0; position:relative; }
+.cell-god .god-name { font-size:15px; }
+.cell-god .god-state { font-size:10px; color:var(--muted); margin-left:2px; }
+.cell-god .m-star { font-size:16px; color:var(--star); position:absolute; right:4px; top:2px; }
+.cell-god .xunkong-mark { font-size:12px; color:var(--xunkong); margin-left:3px; }
+.cell-god .si-badge { display:inline-block; font-size:9px; padding:1px 4px; border-radius:3px; color:#fff; margin-left:3px; line-height:1.2; }
+.cell-god .si-badge.menpo { background:var(--menpo); }
+.cell-god .si-badge.rumu { background:var(--rumu); }
+.cell-god .si-badge.jixing { background:var(--jixing); }
+.cell-god .si-badge.both { background:var(--both); }
+
+.cell-content { display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding:2px 5px; flex:1; }
+.cell-left { display:flex; flex-direction:column; align-items:flex-start; gap:1px; }
+.cell-right { display:flex; flex-direction:column; align-items:flex-end; gap:1px; }
+
+.cell-tiangan { font-size:20px; font-weight:bold; color:var(--gan); line-height:1.1; }
+.cell-star { font-size:11px; color:var(--star); }
+.cell-door { font-size:12px; color:var(--door); font-weight:500; }
+.cell-diangan { font-size:13px; color:var(--zhi); }
+.cell-num { font-size:11px; color:var(--muted); font-weight:bold; position:absolute; bottom:2px; left:4px; }
+.cell-changsheng { font-size:10px; color:var(--cs); }
+.cell-wangshuai { font-size:10px; padding:1px 3px; border-radius:3px; display:inline-block; margin-top:1px; }
+.wang { background:var(--wang-bg); color:var(--wang-c); }
+.xiang { background:var(--xiang-bg); color:var(--xiang-c); }
+.xiu { background:var(--xiu-bg); color:var(--xiu-c); }
+.qiu { background:var(--qiu-bg); color:var(--qiu-c); }
+.si { background:var(--si-bg); color:var(--si-c); }
+.cell-rumu { font-size:9px; color:var(--rumu); font-weight:bold; }
+.cell-jixing { font-size:9px; color:var(--jixing); font-weight:bold; }
+.cell-menpo { font-size:9px; color:var(--menpo); font-weight:bold; }
+
+.cell .gong-watermark { position:absolute; font-size:55px; color:rgba(160,128,80,0.06); font-weight:bold; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; z-index:0; }
+
+.cell.zhong { background:#faf5ed; justify-content:center; align-items:center; min-height:60px; }
+.cell.zhong .cell-num { position:static; text-align:center; font-size:16px; color:var(--accent); margin-bottom:3px; }
+.cell.zhong .zhong-label { font-size:12px; color:var(--muted); }
+
+/* 占断面板 */
+.reading-card { background:var(--card); border-radius:10px; padding:14px; margin-top:10px; box-shadow:0 2px 6px rgba(0,0,0,0.06); font-size:13px; line-height:1.8; }
+.reading-card h3 { color:var(--accent); margin-bottom:8px; font-size:15px; border-bottom:1px solid #e8e0d5; padding-bottom:6px; }
+.reading-card .alert { color:var(--gan); font-weight:600; }
+.reading-card .warning { color:var(--star); font-weight:600; }
+.reading-card .good { color:var(--door); font-weight:600; }
+.reading-card .si-list { display:flex; flex-wrap:wrap; gap:4px; margin:4px 0; }
+.reading-card .si-tag { font-size:11px; padding:2px 6px; border-radius:4px; color:#fff; }
+.reading-card .si-tag.menpo { background:var(--menpo); }
+.reading-card .si-tag.rumu { background:var(--rumu); }
+.reading-card .si-tag.jixing { background:var(--jixing); }
+.reading-card .si-tag.both { background:var(--both); }
+.reading-card .si-tag.xunkong { background:var(--xunkong); }
+.reading-card .si-tag.fuyin { background:var(--gan); }
+
+.detail-card { background:var(--card); border-radius:10px; padding:14px; margin-top:10px; box-shadow:0 2px 6px rgba(0,0,0,0.06); font-size:12px; line-height:1.8; color:var(--muted); }
+.detail-card h3 { color:var(--accent); margin-bottom:8px; font-size:15px; border-bottom:1px solid #e8e0d5; padding-bottom:6px; }
+
+@media (max-width:480px) {
+  .container { padding:8px; }
+  .cell { min-height:95px; }
+  .cell-tiangan { font-size:17px; }
+  .cell-god { font-size:12px; }
+  .cell-star, .cell-door { font-size:10px; }
+  .input-row { flex-direction:column; }
+  .input-group { width:100%; }
+}
+/* PWA 安装条 */
+.pwa-bar { display:flex; align-items:center; justify-content:space-between; background:var(--card); border-radius:10px; padding:10px 14px; margin-top:10px; box-shadow:0 2px 6px rgba(0,0,0,0.06); gap:10px; }
+.pwa-bar span { font-size:13px; color:var(--text); flex:1; }
+.pwa-bar .btn-install { padding:6px 14px; background:var(--accent); color:#fff; border:none; border-radius:6px; font-size:13px; cursor:pointer; font-weight:600; letter-spacing:1px; }
+.pwa-bar .btn-install:hover { background:#8b6f47; }
+
+/* Obsidian 导出 */
+.obsidian-card { background:var(--card); border-radius:10px; padding:14px; margin-top:10px; box-shadow:0 2px 6px rgba(0,0,0,0.06); }
+.obsidian-card h3 { color:var(--accent); margin-bottom:10px; font-size:15px; border-bottom:1px solid #e8e0d5; padding-bottom:6px; }
+.obsidian-btns { display:flex; gap:8px; flex-wrap:wrap; }
+.btn-obs { padding:7px 14px; background:#e8e0d5; color:var(--text); border:1px solid #d5c8b5; border-radius:6px; font-size:13px; cursor:pointer; font-weight:500; transition:all .2s; }
+.btn-obs:hover { background:var(--accent); color:#fff; border-color:var(--accent); }
+</style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#a08050">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="奇门排盘">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon.svg">
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>奇门遁甲排盘</h1>
+    <p class="sub">时家转盘奇门 · 拆补法</p>
+  </div>
+
+  <div class="input-card">
+    <div class="input-row">
+      <div class="input-group">
+        <label>公历日期</label>
+        <input type="date" id="dateInput">
+      </div>
+      <div class="input-group">
+        <label>时间</label>
+        <input type="time" id="timeInput" step="60">
+      </div>
+      <div class="input-group">
+        <label>时区</label>
+        <select id="tzSelect"><option value="8">北京时间 UTC+8</option></select>
+      </div>
+      <button class="btn" onclick="doPaiPan()">排 盘</button>
+      <button class="btn-now" onclick="setNow()">现在</button>
+    </div>
+  </div>
+
+  <div class="sizhu-card" id="sizhuCard"></div>
+  <div class="info-row" id="infoRow"></div>
+
+  <div class="collapse-btn" id="jieQiBtn" onclick="toggleJieQi()">点击显示节气</div>
+  <div class="collapse-content" id="jieQiContent"></div>
+
+  <div class="legend">
+    <div class="legend-item"><span style="color:var(--gan)">●</span>天盘</div>
+    <div class="legend-item"><span style="color:var(--zhi)">●</span>地盘</div>
+    <div class="legend-item"><span style="color:var(--star)">●</span>九星</div>
+    <div class="legend-item"><span style="color:var(--door)">●</span>八门</div>
+    <div class="legend-item"><span style="color:var(--god)">●</span>八神</div>
+    <div class="legend-item"><span style="color:var(--cs)">●</span>长生</div>
+  </div>
+
+  <div class="grid-container" id="gridContainer"></div>
+
+  <div class="reading-card" id="readingCard"></div>
+  <div class="detail-card" id="detailCard"></div>
+
+  <div class="obsidian-card" id="obsidianCard">
+    <h3>保存到 Obsidian</h3>
+    <div class="obsidian-btns">
+      <button class="btn-obs" onclick="saveObsidian('download')">下载 .md 文件</button>
+      <button class="btn-obs" onclick="saveObsidian('image')">导出图片</button>
+      <button class="btn-obs" onclick="saveObsidian('uri')">用 Obsidian 打开</button>
+      <button class="btn-obs" onclick="saveObsidian('clipboard')">复制 Markdown</button>
+    </div>
+  </div>
+
+  <div class="pwa-bar" id="pwaBar">
+    <span>安装到手机桌面，离线也能排盘</span>
+    <button class="btn-install" id="btnInstall" onclick="installPWA()">安装</button>
+  </div>
+</div>
+
+<script>
+// ========== 常量数据（冻结避免误改）==========
+const TIAN_GAN = Object.freeze(['甲','乙','丙','丁','戊','己','庚','辛','壬','癸']);
+const DI_ZHI = Object.freeze(['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥']);
+const GONG_ORDER = Object.freeze([4,9,2,3,5,7,8,1,6]);
+const QI_YI_ORDER = Object.freeze(['戊','己','庚','辛','壬','癸','丁','丙','乙']);
+const STAR_SEQ = Object.freeze(['天蓬','天任','天冲','天辅','天英','天芮','天柱','天心','天禽']);
+const STAR_GONG = Object.freeze([1,8,3,4,9,2,7,6,5]);
+const DOOR_ORIGIN = Object.freeze({1:'休',8:'生',3:'伤',4:'杜',9:'景',2:'死',7:'惊',6:'开',5:'死'});
+const DOOR_ORDER = Object.freeze(['休','生','伤','杜','景','死','惊','开']);
+const GONG_WALK = Object.freeze([1,8,3,4,9,2,7,6,5]);
+const GODS = Object.freeze(['值符','螣蛇','太阴','六合','白虎','玄武','九地','九天']);
+const GAN_WUXING = Object.freeze([0,0,1,1,2,2,3,3,4,4]);
+const WUXING_NAME = Object.freeze(['木','火','土','金','水']);
+const ZHI_WUXING = Object.freeze([4,2,0,0,2,1,1,2,3,3,2,4]);
+const GONG_ZHI = Object.freeze({1:0,2:7,3:3,4:4,5:-1,6:10,7:9,8:1,9:6});
+const CHANGSHENG_START = Object.freeze({0:11,2:2,4:2,6:5,8:8,1:6,3:9,5:9,7:0,9:3});
+const CHANGSHENG_NAME = Object.freeze(['长生','沐浴','冠带','临官','帝旺','衰','病','死','墓','绝','胎','养']);
+const XUNKONG_MAP = Object.freeze({0:[10,11],10:[8,9],8:[6,7],6:[4,5],4:[2,3],2:[0,1]});
+const DOOR_WX = Object.freeze({休:4,生:2,伤:0,杜:0,景:1,死:2,惊:3,开:3});
+const GONG_WX = Object.freeze({1:4,2:2,3:0,4:0,5:2,6:3,7:3,8:2,9:1});
+
+// 入墓表：天干 -> 宫位
+const RUMU_GONG = Object.freeze({
+  甲:2, 乙:6, 丙:6, 丁:8, 戊:6, 己:8, 庚:8, 辛:4, 壬:4, 癸:2
+});
+// 击刑表：天干 -> 宫位
+const JIXING_GONG = Object.freeze({
+  戊:3, 己:2, 庚:8, 辛:9, 壬:4, 癸:4
+});
+// 马星表：时支 -> 宫位
+const MAXING_GONG = Object.freeze({
+  0:8, 1:8, 2:8, 3:2, 4:2, 5:2, 6:4, 7:4, 8:4, 9:6, 10:6, 11:6
+});
+
+const JIE_QI = Object.freeze([
+  {name:'冬至',month:12,day:21,yang:true,ju:1},{name:'小寒',month:1,day:5,yang:true,ju:2},
+  {name:'大寒',month:1,day:20,yang:true,ju:3},{name:'立春',month:2,day:4,yang:true,ju:8},
+  {name:'雨水',month:2,day:19,yang:true,ju:9},{name:'惊蛰',month:3,day:6,yang:true,ju:1},
+  {name:'春分',month:3,day:21,yang:true,ju:3},{name:'清明',month:4,day:5,yang:true,ju:4},
+  {name:'谷雨',month:4,day:20,yang:true,ju:5},{name:'立夏',month:5,day:5,yang:true,ju:4},
+  {name:'小满',month:5,day:21,yang:true,ju:5},{name:'芒种',month:6,day:6,yang:true,ju:6},
+  {name:'夏至',month:6,day:21,yang:false,ju:9},{name:'小暑',month:7,day:7,yang:false,ju:8},
+  {name:'大暑',month:7,day:23,yang:false,ju:7},{name:'立秋',month:8,day:7,yang:false,ju:2},
+  {name:'处暑',month:8,day:23,yang:false,ju:1},{name:'白露',month:9,day:8,yang:false,ju:9},
+  {name:'秋分',month:9,day:23,yang:false,ju:7},{name:'寒露',month:10,day:8,yang:false,ju:6},
+  {name:'霜降',month:10,day:23,yang:false,ju:5},{name:'立冬',month:11,day:7,yang:false,ju:6},
+  {name:'小雪',month:11,day:22,yang:false,ju:5},{name:'大雪',month:12,day:7,yang:false,ju:4},
+]);
+
+const MONTH_JIE = Object.freeze([
+  {m:2,d:4,zhi:0},{m:3,d:6,zhi:1},{m:4,d:5,zhi:2},{m:5,d:5,zhi:3},
+  {m:6,d:6,zhi:4},{m:7,d:7,zhi:5},{m:8,d:7,zhi:6},{m:9,d:8,zhi:7},
+  {m:10,d:8,zhi:8},{m:11,d:7,zhi:9},{m:12,d:7,zhi:10},{m:1,d:5,zhi:11},
+]);
+
+const BASE_DATE = new Date(2000,0,1);
+const BASE_GZ = [5,7];
+
+// 农历数据
+const LUNAR_INFO = Object.freeze([
+  0x14ad8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x07554,0x056a0,0x09ad0,0x115d2,
+  0x04ae0,0x1a1b6,0x0a4d0,0x0d250,0x0da55,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x04b77,
+  0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x0bb54,0x02b60,0x09570,0x112f2,0x04970,
+  0x16166,0x0d4a0,0x0ea50,0x16695,0x05ad0,0x02b60,0x0a6e3,0x092e0,0x0cad7,0x0c950,
+  0x0d4a0,0x0dca6,0x0b550,0x056a0,0x0b5b4,0x025d0,0x092d0,0x192b2,0x0a950,0x0b557,
+  0x06ca0,0x0b550,0x05b55,0x04da0,0x0a5d0,0x06573,0x052b0,0x1a8a8,0x0e950,0x06aa0,
+  0x1aaa6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x1d263,0x0d950,0x15957,0x056a0,
+  0x096d0,0x145d5,0x04ad0,0x0a4d0,0x1c4d4,0x0d250,0x1d458,0x0b540,0x0b5a0,0x195a6,
+  0x095b0,0x049b0,0x0a974,0x0a4b0,0x1b23a,0x06a50,0x06d40,0x1ab46,0x0ab60,0x09570,
+  0x142f5,0x04970,0x064b0,0x154a3,0x0ea50,0x16a58,0x05ac0,0x0ab60,0x096d5,0x092e0,
+  0x0c960,0x1c954,0x0d4a0,0x0da50,0x13552,0x056a0,0x1a9b7,0x025d0,0x092d0,0x1c2b5,
+  0x0a950,0x0b4a0,0x1aaa4,0x0ad50,0x15559,0x04ba0,0x0a5b0,0x05576,0x052b0,0x0a930,
+  0x16954,0x06aa0,0x0ad50,0x11b52,0x04b60,0x1a2e6,0x0a4e0,0x0d260,0x1e265,0x0d530,
+  0x05aa0,0x156a3,0x096d0,0x14adb,0x04ad0,0x0a4d0,0x0d4b6,0x0d250,0x0d520,0x1d545,
+  0x0b5a0,0x056d0,0x115b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x0ba55,0x06d20,0x0ada0,
+  0x06b63,0x09370,0x148f8,0x04970,0x064b0,0x06ca6,0x0ea50,0x06aa0,0x0b6c4,0x0aae0,
+  0x092e0,0x0d2e3,0x0c960,0x0d557,0x0d4a0,0x0da50,0x15555,0x056a0,0x0a6d0,0x145d4,
+  0x052d0,0x1a8b8,0x0a950,0x0b4a0,0x1b2a6,0x0ad50,0x055a0,0x0aba4,0x0a5b0,0x052b0,
+  0x19273,0x06930,0x17137,0x06aa0,0x0ad50,0x14b55,0x04b60,0x0a570,0x144e4,0x0d160,
+  0x1e868,0x0d520,0x0daa0,0x06ea6,0x056d0,0x04ae0,0x0a9d4,0x0a2d0,0x0d150
+]);
+const LUNAR_MONTH = Object.freeze(['正','二','三','四','五','六','七','八','九','十','冬','腊']);
+const LUNAR_DAY = Object.freeze(['初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
+  '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
+  '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十']);
+
+// ========== 性能优化：缓存对象池 ==========
+const CACHE = new Map();
+function cacheKey(prefix, ...args) { return prefix + ':' + args.join(','); }
+
+// ========== 基础算法 ==========
+function daysBetween(d1,d2) {
+  const t1 = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate());
+  const t2 = new Date(d2.getFullYear(), d2.getMonth(), d2.getDate());
+  return Math.round((t2-t1)/86400000);
+}
+function gzFromDayOffset(offset) {
+  const g = ((offset % 10) + BASE_GZ[0] - 1 + 10) % 10;
+  const z = ((offset % 12) + BASE_GZ[1] - 1 + 12) % 12;
+  return [g+1,z+1];
+}
+function dayGanZhi(date) {
+  const key = cacheKey('day', date.getFullYear(), date.getMonth(), date.getDate());
+  if (CACHE.has(key)) return CACHE.get(key);
+  const offset = daysBetween(BASE_DATE, date);
+  const gz = gzFromDayOffset(offset);
+  const result = {ganIdx: gz[0]-1, zhiIdx: gz[1]-1};
+  CACHE.set(key, result);
+  return result;
+}
+function yearGanZhi(date) {
+  let year = date.getFullYear(), month = date.getMonth()+1, day = date.getDate();
+  if ((month===2 && day<4) || month===1) year--;
+  const g = (year-4)%10, z = (year-4)%12;
+  return {ganIdx:g<0?g+10:g, zhiIdx:z<0?z+12:z};
+}
+function getZhiMonth(date) {
+  const m = date.getMonth()+1, d = date.getDate(), curDate = m*100+d;
+  for (let i=0;i<12;i++) {
+    const j = MONTH_JIE[i], nextJ = MONTH_JIE[(i+1)%12];
+    const jDate = j.m*100+j.d, nDate = nextJ.m*100+nextJ.d;
+    if (jDate <= nDate) { if (curDate>=jDate && curDate<nDate) return j.zhi; }
+    else { if (curDate>=jDate || curDate<nDate) return j.zhi; }
+  }
+  return 0;
+}
+function monthGanZhi(date) {
+  const yearGZ = yearGanZhi(date), yGan = yearGZ.ganIdx, m = getZhiMonth(date);
+  const yueZhi = [2,3,4,5,6,7,8,9,10,11,0,1][m];
+  const yueGan = (((yGan%5)*2 + 2) + m) % 10;
+  return {ganIdx:yueGan, zhiIdx:yueZhi};
+}
+function hourGanZhi(date, dayGan) {
+  const h = date.getHours();
+  const shiZhiIdx = Math.floor(((h+1)%24)/2) % 12;
+  const shiGanIdx = ((dayGan-1)*2 + shiZhiIdx) % 10;
+  return {ganIdx:shiGanIdx, zhiIdx:shiZhiIdx};
+}
+function fmtGZ(ganIdx,zhiIdx) { return TIAN_GAN[ganIdx] + DI_ZHI[zhiIdx]; }
+
+function getJieQi(date) {
+  const m = date.getMonth()+1, d = date.getDate();
+  for (let i=JIE_QI.length-1;i>=0;i--) {
+    const jq = JIE_QI[i];
+    if (m*100+d >= jq.month*100+jq.day) return jq;
+  }
+  return JIE_QI[0];
+}
+function getSanYuan(dayGZ) {
+  let s = dayGZ.ganIdx + 1;
+  const target = (dayGZ.zhiIdx + 1) % 12;
+  while (s % 12 !== target) s += 10;
+  let fuTouIdx = s;
+  while (true) {
+    fuTouIdx--;
+    if (fuTouIdx <= 0) fuTouIdx += 60;
+    const fg = (fuTouIdx - 1) % 10;
+    if (fg === 0 || fg === 5) break;
+  }
+  const fz = (fuTouIdx - 1) % 12;
+  if ([0, 6, 3, 9].includes(fz)) return '上元';
+  if ([2, 8, 5, 11].includes(fz)) return '中元';
+  return '下元';
+}
+function getJuShu(jieQi, dayGZ) {
+  let offset = 0;
+  const sy = getSanYuan(dayGZ);
+  if (sy === '中元') offset = 1;
+  if (sy === '下元') offset = 2;
+  if (jieQi.yang) {
+    return ((jieQi.ju + offset - 1) % 9) + 1;
+  } else {
+    return ((jieQi.ju - offset - 1 + 9) % 9) + 1;
+  }
+}
+
+function getChangSheng(ganIdx, zhiIdx) {
+  if (zhiIdx < 0) return '';
+  const start = CHANGSHENG_START[ganIdx];
+  if (start === undefined) return '';
+  const isYang = [0,2,4,6,8].includes(ganIdx);
+  let offset = isYang ? (zhiIdx - start + 12) % 12 : (start - zhiIdx + 12) % 12;
+  return CHANGSHENG_NAME[offset];
+}
+function getWangShuai(ganIdx, yueZhiIdx) {
+  const seasonWx = (yueZhiIdx>=2&&yueZhiIdx<=3)?0:(yueZhiIdx>=4&&yueZhiIdx<=5)?1:(yueZhiIdx>=6&&yueZhiIdx<=7)?2:(yueZhiIdx>=8&&yueZhiIdx<=9)?3:4;
+  const wx = GAN_WUXING[ganIdx];
+  const sheng = [1,2,3,4,0], ke = [3,4,0,1,2];
+  if (wx === seasonWx) return {name:'旺',cls:'wang'};
+  if (sheng[wx] === seasonWx) return {name:'相',cls:'xiang'};
+  if (sheng[seasonWx] === wx) return {name:'休',cls:'xiu'};
+  if (ke[wx] === seasonWx) return {name:'囚',cls:'qiu'};
+  if (ke[seasonWx] === wx) return {name:'死',cls:'si'};
+  return {name:'平',cls:''};
+}
+function getXunKong(gong, xunShouZhiIdx) {
+  const zhiIdx = GONG_ZHI[gong];
+  if (zhiIdx < 0) return false;
+  const empties = XUNKONG_MAP[xunShouZhiIdx];
+  return empties ? empties.includes(zhiIdx) : false;
+}
+function getXunKongZhi(xunShouZhiIdx) {
+  const empties = XUNKONG_MAP[xunShouZhiIdx];
+  return empties ? DI_ZHI[empties[0]] + DI_ZHI[empties[1]] : '';
+}
+
+// ========== 排盘核心 ==========
+function getQiyiGong(juShu, isYang, qiyiIdx) {
+  const gongSeq = [1,2,3,4,5,6,7,8,9];
+  if (isYang) return gongSeq[(juShu - 1 + qiyiIdx) % 9];
+  return gongSeq[((juShu - 1 - qiyiIdx) % 9 + 9) % 9];
+}
+function getXunShou(ganIdx, zhiIdx) {
+  const xunLius = ['戊','己','庚','辛','壬','癸'];
+  const xunStarts = [0, 10, 8, 6, 4, 2];
+  let s = ganIdx + 1;
+  const target = (zhiIdx + 1) % 12;
+  while (s % 12 !== target) s += 10;
+  const xunIdx = Math.floor((s - 1) / 10);
+  return {xunIdx: xunIdx, yi: xunLius[xunIdx], zhiStart: xunStarts[xunIdx]};
+}
+function paiDiPan(juShu, isYang) {
+  const dipan = {};
+  for (let i=0;i<9;i++) dipan[getQiyiGong(juShu,isYang,i)] = QI_YI_ORDER[i];
+  return dipan;
+}
+function findZhiFuZhiShi(diPan, xunShou) {
+  for (let g=1;g<=9;g++) if (diPan[g] === xunShou.yi) return g;
+  return 1;
+}
+function resolveGong(g) { return g === 5 ? 2 : g; }
+function paiTianPan(diPan, zhiFuGong, xunShouYi, isYang) {
+  let zhiFuDiGong = null;
+  for (let g=1;g<=9;g++) if (diPan[g] === xunShouYi) { zhiFuDiGong = g; break; }
+  const zfDiG = resolveGong(zhiFuDiGong), zfG = resolveGong(zhiFuGong);
+  const offset = (zfG - zfDiG + 9) % 9;
+  const tianpan = {};
+  for (let g=1;g<=9;g++) {
+    const rg = resolveGong(g);
+    let srcG = isYang ? ((rg - offset - 1 + 9) % 9) + 1 : ((rg + offset - 1 + 9) % 9) + 1;
+    tianpan[g] = diPan[srcG];
+  }
+  return tianpan;
+}
+function paiXing(zhiFuGong, isYang) {
+  const zfG = resolveGong(zhiFuGong);
+  const idx = STAR_GONG.indexOf(zfG);
+  const zhiFuStar = STAR_SEQ[idx];
+  const walk = isYang ? GONG_WALK : [...GONG_WALK].reverse();
+  const stars = isYang ? STAR_SEQ : [...STAR_SEQ].reverse();
+  const starIdx = stars.indexOf(zhiFuStar);
+  const walkIdx = walk.indexOf(zfG);
+  const starMap = {};
+  for (let i=0;i<9;i++) starMap[walk[(walkIdx+i)%9]] = stars[(starIdx+i)%9];
+  return {map:starMap, zhiFuStar, zhiFuGong};
+}
+function paiMen(juShu, isYang, xunShou, shiGZ, diPan) {
+  const xunLiuYi = xunShou.yi;
+  let zhiFuDiGong = null;
+  for (let g=1;g<=9;g++) if (diPan[g] === xunLiuYi) { zhiFuDiGong = g; break; }
+  const zhiShiDoor = DOOR_ORIGIN[resolveGong(zhiFuDiGong)] || '休';
+  const shiZhi = shiGZ.zhiIdx, xunStart = xunShou.zhiStart;
+  const shiChenShu = (shiZhi - xunStart + 12) % 12;
+  const walk = isYang ? [1,8,3,4,9,2,7,6] : [6,7,2,9,4,3,8,1];
+  const doorSeq = isYang ? DOOR_ORDER : [...DOOR_ORDER].reverse();
+  const originIdx = walk.indexOf(resolveGong(zhiFuDiGong));
+  const targetIdx = ((originIdx + (isYang ? shiChenShu : -shiChenShu)) % 8 + 8) % 8;
+  const targetGong = walk[targetIdx];
+  const menMap = {};
+  for (let i=0;i<8;i++) menMap[walk[(targetIdx+i)%8]] = doorSeq[i];
+  return {map:menMap, zhiShiMen:zhiShiDoor, zhiShiGong:targetGong, shiChenShu};
+}
+function paiShen(zhiFuGong, isYang) {
+  const gongSeq = [1,8,3,4,9,2,7,6];
+  const zfG = resolveGong(zhiFuGong);
+  const startIdx = gongSeq.indexOf(zfG);
+  const shenSeq = isYang ? GODS : ['值符', ...GODS.slice(1).reverse()];
+  const shenMap = {};
+  for (let i=0;i<8;i++) {
+    shenMap[gongSeq[(startIdx + i) % 8]] = shenSeq[i];
+  }
+  return shenMap;
+}
+
+// ========== 四害检测 ==========
+function checkMenPo(door, gong) {
+  // 门克宫为门迫
+  const doorWx = DOOR_WX[door], gongWx = GONG_WX[gong];
+  if (doorWx === undefined || gongWx === undefined) return false;
+  const ke = [3,4,0,1,2]; // 木克土 土克水 水克火 火克金 金克木
+  return ke[doorWx] === gongWx;
+}
+function checkRuMu(gan, gong) {
+  // 天干入墓
+  const gongIdx = RUMU_GONG[gan];
+  return gongIdx === gong;
+}
+function checkJiXing(gan, gong) {
+  // 天干击刑
+  const gongIdx = JIXING_GONG[gan];
+  return gongIdx === gong;
+}
+function checkMaXing(shiZhiIdx) {
+  // 马星宫位
+  return MAXING_GONG[shiZhiIdx];
+}
+
+// ========== 伏吟判断 ==========
+function checkFuYin(tianPan, diPan, xingMap, menMap) {
+  const result = { gan: [], xing: [], men: [] };
+  // 干伏吟：天盘干=地盘干
+  for (let g=1; g<=9; g++) {
+    if (g===5) continue;
+    if (tianPan[g] === diPan[g]) result.gan.push(g);
+  }
+  // 星伏吟：九星回归原始宫位
+  for (let g=1; g<=9; g++) {
+    if (g===5) continue;
+    const idx = STAR_GONG.indexOf(g);
+    if (idx >= 0 && xingMap[g] === STAR_SEQ[idx]) result.xing.push(g);
+  }
+  // 门伏吟：八门保持初始宫位
+  for (let g=1; g<=9; g++) {
+    if (g===5) continue;
+    if (menMap[g] === DOOR_ORIGIN[g]) result.men.push(g);
+  }
+  return result;
+}
+
+// ========== 农历 ==========
+function lunarYearDays(y) { let i=0x8000,sum=348; for(let j=0;j<12;j++){sum+=(LUNAR_INFO[y-1900]&i)?1:0;i>>=1;} return sum+leapDays(y); }
+function leapDays(y) { if(leapMonth(y)) return (LUNAR_INFO[y-1900]&0x10000)?30:29; return 0; }
+function leapMonth(y) { return LUNAR_INFO[y-1900]&0xf; }
+function monthDays(y,m) { return (LUNAR_INFO[y-1900]&(0x10000>>m))?30:29; }
+function getYearGanZhi(y) { let g=(y-4)%10,z=(y-4)%12; return TIAN_GAN[g<0?g+10:g]+DI_ZHI[z<0?z+12:z]; }
+function toLunar(date) {
+  let y=date.getFullYear(),m=date.getMonth()+1,d=date.getDate();
+  let base=new Date(1900,0,31), offset=Math.floor((date-base)/86400000);
+  let i,leap=0,temp=0;
+  for(i=1900;i<2100&&offset>0;i++){temp=lunarYearDays(i);offset-=temp;}
+  if(offset<0){offset+=temp;i--;}
+  let year=i; leap=leapMonth(i);
+  let isLeap=false;
+  for(i=1;i<13&&offset>0;i++){
+    if(leap>0&&i==leap+1&&!isLeap){i--;isLeap=true;temp=leapDays(year);}
+    else{temp=monthDays(year,i);}
+    if(isLeap&&i==leap+1)isLeap=false;
+    offset-=temp;
+  }
+  if(offset==0&&leap>0&&i==leap+1){if(isLeap)isLeap=false;else{isLeap=true;i--;}}
+  if(offset<0){offset+=temp;i--;}
+  let month=i,day=offset+1;
+  return {year,month,day,isLeap,
+    monthStr:(isLeap?'闰':'')+LUNAR_MONTH[month-1]+'月',
+    dayStr:LUNAR_DAY[day-1],
+    ganZhi:getYearGanZhi(year)};
+}
+
+// ========== DOM 构建（DocumentFragment优化）==========
+function buildCellHTML(g, diPan, tianPan, xingMap, menMap, shenMap, zhiFuGong, menResult, xunShou, yueZhiIdx, shiZhiIdx, siHai) {
+  if (g === 5) {
+    return `<div class="cell zhong"><div class="cell-num">5</div><div class="zhong-label">中宫</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">${diPan[5]||'戊'}寄坤二</div></div>`;
+  }
+  const diGan = diPan[g] || '';
+  const tianGan = tianPan[g] || '';
+  const star = xingMap[g] || '';
+  const door = menMap[g] || '';
+  const god = shenMap[g] || '';
+  const isZhiFu = g === zhiFuGong;
+  const isZhiShi = g === menResult.zhiShiGong;
+  const isMaXing = g === checkMaXing(shiZhiIdx);
+  const isXunKong = getXunKong(g, xunShou.zhiStart);
+
+  const gongZhi = GONG_ZHI[g];
+  const csTian = getChangSheng(TIAN_GAN.indexOf(tianGan), gongZhi);
+  const csDi = getChangSheng(TIAN_GAN.indexOf(diGan), gongZhi);
+  const wsTian = getWangShuai(TIAN_GAN.indexOf(tianGan), yueZhiIdx);
+  const wsDi = getWangShuai(TIAN_GAN.indexOf(diGan), yueZhiIdx);
+
+  let extraCls = '';
+  const cellSiHai = siHai[g] || {};
+  if (cellSiHai.ganFuyin) extraCls += ' gan-fuyin';
+  if (cellSiHai.xingFuyin) extraCls += ' xing-fuyin';
+  if (cellSiHai.menFuyin) extraCls += ' men-fuyin';
+  if (isZhiFu) extraCls += ' highlight';
+
+  let godBadges = '';
+  if (cellSiHai.menpo) godBadges += `<span class="si-badge menpo">迫</span>`;
+  if (cellSiHai.rumu) godBadges += `<span class="si-badge rumu">墓</span>`;
+  if (cellSiHai.jixing) godBadges += `<span class="si-badge jixing">刑</span>`;
+  if (cellSiHai.both) godBadges += `<span class="si-badge both">墓刑</span>`;
+
+  let mStar = isMaXing ? `<span class="m-star" title="马星">马</span>` : '';
+  let xunkongMark = isXunKong ? '<span class="xunkong-mark">○</span>' : '';
+  let godState = god === '值符' ? '临' : '';
+
+  let leftBottom = '';
+  if (cellSiHai.rumuTian) leftBottom += `<span class="cell-rumu">天墓</span>`;
+  if (cellSiHai.jixingTian) leftBottom += `<span class="cell-jixing">天刑</span>`;
+  if (cellSiHai.menpo) leftBottom += `<span class="cell-menpo">门迫</span>`;
+
+  return `
+    <div class="cell${extraCls}">
+      <div class="gong-watermark">${g}</div>
+      <div class="cell-god">
+        <span class="god-name">${god}</span>
+        ${godState ? `<span class="god-state">${godState}</span>` : ''}
+        ${xunkongMark}
+        ${godBadges}
+        ${mStar}
+      </div>
+      <div class="cell-content">
+        <div class="cell-left">
+          <span class="cell-diangan">${diGan}</span>
+          ${csDi ? `<span class="cell-changsheng">${csDi}</span>` : ''}
+          ${wsDi.name ? `<span class="cell-wangshuai ${wsDi.cls}">${wsDi.name}</span>` : ''}
+          ${leftBottom}
+        </div>
+        <div class="cell-right" style="text-align:right;">
+          <span class="cell-tiangan">${tianGan}</span>
+          <span class="cell-star">${star}</span>
+          <span class="cell-door">${door}${isZhiShi?'(使)':''}门</span>
+          ${csTian ? `<span class="cell-changsheng">${csTian}</span>` : ''}
+          ${wsTian.name ? `<span class="cell-wangshuai ${wsTian.cls}">${wsTian.name}</span>` : ''}
+          ${cellSiHai.rumuDi ? `<span class="cell-rumu">地墓</span>` : ''}
+          ${cellSiHai.jixingDi ? `<span class="cell-jixing">地刑</span>` : ''}
+        </div>
+      </div>
+      <div class="cell-num">${g}</div>
+    </div>`;
+}
+
+// ========== 主排盘函数 ==========
+function doPaiPan() {
+  const t0 = performance.now();
+  const dateStr = document.getElementById('dateInput').value;
+  const timeStr = document.getElementById('timeInput').value;
+  if (!dateStr) { alert('请选择日期'); return; }
+
+  let date, hour=0, minute=0;
+  if (timeStr) {
+    const [h,m] = timeStr.split(':'); hour=parseInt(h); minute=parseInt(m);
+    date = new Date(dateStr+'T'+timeStr);
+  } else { date = new Date(dateStr); }
+
+  // 1. 四柱
+  const yGZ = yearGanZhi(date);
+  const mGZ = monthGanZhi(date);
+  const dGZ = dayGanZhi(date);
+  const hGZ = hourGanZhi(date, dGZ.ganIdx+1);
+  const yearStr=fmtGZ(yGZ.ganIdx,yGZ.zhiIdx), monthStr=fmtGZ(mGZ.ganIdx,mGZ.zhiIdx);
+  const dayStr=fmtGZ(dGZ.ganIdx,dGZ.zhiIdx), hourStr=fmtGZ(hGZ.ganIdx,hGZ.zhiIdx);
+
+  // 2. 节气与用局
+  const jieQi = getJieQi(date);
+  const isYang = jieQi.yang;
+  const sanYuan = getSanYuan(dGZ);
+  const juShu = getJuShu(jieQi, dGZ);
+  const dunStr = isYang ? '阳遁' : '阴遁';
+
+  // 3. 地盘
+  const diPan = paiDiPan(juShu, isYang);
+
+  // 4. 旬首 & 值符
+  const xunShou = getXunShou(hGZ.ganIdx, hGZ.zhiIdx);
+  const zhiFuGong = findZhiFuZhiShi(diPan, xunShou);
+
+  // 5. 天盘
+  const tianPan = paiTianPan(diPan, zhiFuGong, xunShou.yi, isYang);
+
+  // 6. 九星
+  const xingResult = paiXing(zhiFuGong, isYang);
+  const xingMap = xingResult.map;
+
+  // 7. 八门
+  const menResult = paiMen(juShu, isYang, xunShou, hGZ, diPan);
+  const menMap = menResult.map;
+
+  // 8. 八神
+  const shenMap = paiShen(zhiFuGong, isYang);
+
+  // 9. 农历
+  const lunar = toLunar(date);
+  const yueZhiIdx = getZhiMonth(date);
+  const xunKongZhi = getXunKongZhi(xunShou.zhiStart);
+
+  // 10. 四害检测
+  const siHai = {};
+  for (let g=1; g<=9; g++) {
+    if (g===5) continue;
+    siHai[g] = {};
+    const tianGan = tianPan[g];
+    const diGan = diPan[g];
+    const door = menMap[g];
+
+    // 门迫
+    if (door && checkMenPo(door, g)) siHai[g].menpo = true;
+
+    // 入墓
+    if (tianGan && checkRuMu(tianGan, g)) siHai[g].rumuTian = true;
+    if (diGan && checkRuMu(diGan, g)) siHai[g].rumuDi = true;
+    if (siHai[g].rumuTian || siHai[g].rumuDi) siHai[g].rumu = true;
+
+    // 击刑
+    if (tianGan && checkJiXing(tianGan, g)) siHai[g].jixingTian = true;
+    if (diGan && checkJiXing(diGan, g)) siHai[g].jixingDi = true;
+    if (siHai[g].jixingTian || siHai[g].jixingDi) siHai[g].jixing = true;
+
+    // 入墓+击刑同时出现
+    if (siHai[g].rumu && siHai[g].jixing) { siHai[g].both = true; siHai[g].rumu=false; siHai[g].jixing=false; }
+  }
+
+  // 11. 伏吟判断
+  const fuYin = checkFuYin(tianPan, diPan, xingMap, menMap);
+  for (let g of fuYin.gan) { if (!siHai[g]) siHai[g]={}; siHai[g].ganFuyin=true; }
+  for (let g of fuYin.xing) { if (!siHai[g]) siHai[g]={}; siHai[g].xingFuyin=true; }
+  for (let g of fuYin.men) { if (!siHai[g]) siHai[g]={}; siHai[g].menFuyin=true; }
+  const isFuYin = fuYin.gan.length > 0 || fuYin.xing.length > 0 || fuYin.men.length > 0;
+
+  // 12. 马星
+  const maXingGong = checkMaXing(hGZ.zhiIdx);
+
+  // === 渲染：使用innerHTML批量更新（比多次appendChild快）===
+  // 四柱表格
+  const sizhuHTML = `
+    <table class="sizhu-table">
+      <tr><th></th><th>年</th><th>月</th><th>日</th><th>时</th></tr>
+      <tr><td class="label">天干</td>
+        <td class="gan">${TIAN_GAN[yGZ.ganIdx]}</td>
+        <td class="gan">${TIAN_GAN[mGZ.ganIdx]}</td>
+        <td class="gan">${TIAN_GAN[dGZ.ganIdx]}</td>
+        <td class="gan">${TIAN_GAN[hGZ.ganIdx]}</td>
+      </tr>
+      <tr><td class="label">地支</td>
+        <td class="zhi">${DI_ZHI[yGZ.zhiIdx]}</td>
+        <td class="zhi">${DI_ZHI[mGZ.zhiIdx]}</td>
+        <td class="zhi">${DI_ZHI[dGZ.zhiIdx]}</td>
+        <td class="zhi">${DI_ZHI[hGZ.zhiIdx]}</td>
+      </tr>
+    </table>
+    <div class="lunar-info">
+      阳历 ${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')} |
+      阴历 ${lunar.ganZhi}年 ${lunar.monthStr}${lunar.dayStr}
+    </div>`;
+  document.getElementById('sizhuCard').innerHTML = sizhuHTML;
+
+  // 信息行
+  let infoHTML = '';
+  infoHTML += `<div class="info-tag"><div class="label">选局</div><div class="value">${dunStr}${juShu}局</div></div>`;
+  infoHTML += `<div class="info-tag"><div class="label">旬首</div><div class="value">甲${DI_ZHI[xunShou.zhiStart]}${xunShou.yi}</div></div>`;
+  infoHTML += `<div class="info-tag"><div class="label">值符</div><div class="value">${xingResult.zhiFuStar}</div></div>`;
+  infoHTML += `<div class="info-tag"><div class="label">值使</div><div class="value">${menResult.zhiShiMen}门</div></div>`;
+  infoHTML += `<div class="info-tag"><div class="label">旬空</div><div class="value">${xunKongZhi}</div></div>`;
+  infoHTML += `<div class="info-tag"><div class="label">马星</div><div class="value">${DI_ZHI[hGZ.zhiIdx]}马在${maXingGong}宫</div></div>`;
+  if (isFuYin) {
+    infoHTML += `<div class="info-tag"><div class="label">格局</div><div class="value fuyin">${fuYin.gan.length?'干伏吟 ':''}${fuYin.xing.length?'星伏吟 ':''}${fuYin.men.length?'门伏吟':''}</div></div>`;
+  }
+  infoHTML += `<div class="info-tag"><div class="label">局式</div><div class="value">转盘-拆补-寄坤二宫</div></div>`;
+  document.getElementById('infoRow').innerHTML = infoHTML;
+
+  // 节气详情
+  const nextJieQiIdx = (JIE_QI.indexOf(jieQi) + 1) % JIE_QI.length;
+  const nextJieQi = JIE_QI[nextJieQiIdx];
+  document.getElementById('jieQiContent').innerHTML = `
+    <div><strong>当前节气：</strong>${jieQi.name}（${jieQi.yang?'阳遁':'阴遁'}${jieQi.ju}局）</div>
+    <div><strong>下一个节气：</strong>${nextJieQi.name}（${nextJieQi.month}月${nextJieQi.day}日）</div>
+    <div><strong>三元：</strong>${sanYuan}</div>
+    <div><strong>月令：</strong>${DI_ZHI[yueZhiIdx]}月（${WUXING_NAME[(yueZhiIdx>=2&&yueZhiIdx<=3)?0:(yueZhiIdx>=4&&yueZhiIdx<=5)?1:(yueZhiIdx>=6&&yueZhiIdx<=7)?2:(yueZhiIdx>=8&&yueZhiIdx<=9)?3:4]}当令）</div>
+  `;
+
+  // 九宫格（拼接字符串一次性更新）
+  let gridHTML = '';
+  for (let g of GONG_ORDER) {
+    gridHTML += buildCellHTML(g, diPan, tianPan, xingMap, menMap, shenMap, zhiFuGong, menResult, xunShou, yueZhiIdx, hGZ.zhiIdx, siHai);
+  }
+  document.getElementById('gridContainer').innerHTML = gridHTML;
+
+  // 占断面板
+  let readingHTML = `<h3>占断摘要</h3>`;
+  if (isFuYin) {
+    readingHTML += `<div class="alert">⚠️ 伏吟局：天盘地盘${fuYin.gan.length?'干伏吟':''}${fuYin.xing.length?'星伏吟':''}${fuYin.men.length?'门伏吟':''} — 主迟滞，利静不利动</div>`;
+  }
+
+  // 收集四害
+  let siHaiList = [];
+  for (let g=1; g<=9; g++) {
+    if (g===5) continue;
+    const s = siHai[g];
+    if (!s) continue;
+    let badges = '';
+    if (s.both) badges += '<span class="si-tag both">入墓+击刑</span>';
+    else {
+      if (s.rumu) badges += '<span class="si-tag rumu">入墓</span>';
+      if (s.jixing) badges += '<span class="si-tag jixing">击刑</span>';
+    }
+    if (s.menpo) badges += '<span class="si-tag menpo">门迫</span>';
+    if (getXunKong(g, xunShou.zhiStart)) badges += '<span class="si-tag xunkong">空亡</span>';
+    if (s.ganFuyin) badges += '<span class="si-tag fuyin">干伏吟</span>';
+    if (s.xingFuyin) badges += '<span class="si-tag fuyin">星伏吟</span>';
+    if (s.menFuyin) badges += '<span class="si-tag fuyin">门伏吟</span>';
+    if (badges) siHaiList.push(`<div>${g}宫：${badges}</div>`);
+  }
+  if (siHaiList.length > 0) {
+    readingHTML += `<div style="margin-top:8px;"><strong>四害与格局：</strong></div>`;
+    readingHTML += `<div class="si-list">${siHaiList.join('')}</div>`;
+  } else {
+    readingHTML += `<div class="good">✓ 本局无明显四害，格局较清</div>`;
+  }
+
+  // 马星提示
+  if (maXingGong) {
+    readingHTML += `<div style="margin-top:8px;"><strong>马星：</strong>在${maXingGong}宫，主奔波、变动、远行</div>`;
+  }
+
+  document.getElementById('readingCard').innerHTML = readingHTML;
+
+  // 详情
+  document.getElementById('detailCard').innerHTML = `
+    <h3>排盘详情</h3>
+    <div><strong>公历：</strong>${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}</div>
+    <div><strong>农历：</strong>${lunar.ganZhi}年 ${lunar.monthStr}${lunar.dayStr}</div>
+    <div><strong>四柱：</strong>${yearStr} ${monthStr} ${dayStr} ${hourStr}</div>
+    <div><strong>节气：</strong>${jieQi.name}（${jieQi.yang?'阳遁':'阴遁'}）</div>
+    <div><strong>用局：</strong>${dunStr}${juShu}局 · ${sanYuan}</div>
+    <div><strong>旬首：</strong>甲${DI_ZHI[xunShou.zhiStart]}（${xunShou.yi}）</div>
+    <div><strong>旬空：</strong>${xunKongZhi}</div>
+    <div><strong>值符：</strong>${xingResult.zhiFuStar}（落${zhiFuGong}宫）</div>
+    <div><strong>值使：</strong>${menResult.zhiShiMen}门（落${menResult.zhiShiGong}宫，动${menResult.shiChenShu}时）</div>
+    <div><strong>马星：</strong>${DI_ZHI[hGZ.zhiIdx]}马在${maXingGong}宫</div>
+    ${isFuYin ? `<div><strong>伏吟：</strong>${fuYin.gan.length?'干伏吟('+fuYin.gan.join(',')+'宫) ':''}${fuYin.xing.length?'星伏吟('+fuYin.xing.join(',')+'宫) ':''}${fuYin.men.length?'门伏吟('+fuYin.men.join(',')+'宫)':''}</div>` : ''}
+    <div style="margin-top:10px;font-size:11px;color:var(--muted);">
+      <p>【排盘步骤】</p>
+      <p>1. 四柱：${yearStr} ${monthStr} ${dayStr} ${hourStr}</p>
+      <p>2. 节气${jieQi.name}，日支${DI_ZHI[dGZ.zhiIdx]}属${sanYuan}，得${dunStr}${juShu}局</p>
+      <p>3. 地盘戊起${juShu}宫${isYang?'顺':'逆'}排三奇六仪</p>
+      <p>4. 时柱${hourStr}，旬首甲${DI_ZHI[xunShou.zhiStart]}（${xunShou.yi}），值符落${zhiFuGong}宫</p>
+      <p>5. 天盘随值符转动，八门值使随时辰推演，九星八神依次排布</p>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:#999;text-align:center;">排盘内容仅供娱乐，请客观科学看待，抵制封建迷信</div>
+  `;
+
+  const t1 = performance.now();
+  console.log(`排盘耗时: ${(t1-t0).toFixed(1)}ms`);
+
+  // 保存到全局供导出使用
+  window._panData = { date, hour, minute, yearStr, monthStr, dayStr, hourStr, lunar, jieQi, isYang, dunStr, juShu, sanYuan, xunShou, xunKongZhi, zhiFuGong, maXingGong, isFuYin, fuYin, siHai, diPan, tianPan, xingMap, menMap, shenMap, yueZhiIdx, hGZ };
+}
+
+function toggleJieQi() {
+  const btn = document.getElementById('jieQiBtn');
+  const content = document.getElementById('jieQiContent');
+  btn.classList.toggle('open');
+  content.classList.toggle('open');
+}
+
+function setNow() {
+  const now = new Date();
+  document.getElementById('dateInput').value = now.toISOString().split('T')[0];
+  document.getElementById('timeInput').value = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+}
+
+window.onload = function() {
+  setNow();
+  doPaiPan();
+  // 注册 Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then((reg) => console.log('Service Worker 注册成功:', reg.scope))
+      .catch((err) => console.log('Service Worker 注册失败:', err));
+  }
+};
+
+// PWA 安装
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+async function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      document.getElementById('pwaBar').style.display = 'none';
+    }
+    deferredPrompt = null;
+  } else {
+    alert('当前浏览器不支持自动安装。请手动：点击浏览器菜单 ⋮ → 应用 → 将此站点作为应用安装');
+  }
+}
+
+// ========== Obsidian 导出 ==========
+function generateMarkdown() {
+  const d = window._panData;
+  if (!d) return '请先排盘后再导出';
+  const { date, hour, minute, yearStr, monthStr, dayStr, hourStr, lunar, jieQi, isYang, dunStr, juShu, sanYuan, xunShou, xunKongZhi, zhiFuGong, maXingGong, isFuYin, fuYin, siHai, diPan, tianPan, xingMap, menMap, shenMap, yueZhiIdx, hGZ } = d;
+  const dateFmt = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+  const timeFmt = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+
+  let md = `# 奇门遁甲排盘 ${dateFmt} ${timeFmt}\n\n`;
+  md += `## 九宫格图片\n\n`;
+  md += `![九宫格](奇门排盘-${dateFmt}.png)\n\n`;
+  md += `## 基本信息\n\n`;
+  md += `- **公历**：${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${timeFmt}\n`;
+  md += `- **农历**：${lunar.ganZhi}年 ${lunar.monthStr}${lunar.dayStr}\n`;
+  md += `- **四柱**：${yearStr} ${monthStr} ${dayStr} ${hourStr}\n`;
+  md += `- **节气**：${jieQi.name}（${isYang?'阳遁':'阴遁'}${jieQi.ju}局）\n`;
+  md += `- **用局**：${dunStr}${juShu}局 · ${sanYuan}\n`;
+  md += `- **旬首**：甲${DI_ZHI[xunShou.zhiStart]}（${xunShou.yi}）\n`;
+  md += `- **旬空**：${xunKongZhi}\n`;
+  md += `- **值符**：${xingMap[zhiFuGong]||''}（落${zhiFuGong}宫）\n`;
+  md += `- **值使**：${menMap[zhiFuGong]||''}门（落${zhiFuGong}宫）\n`;
+  md += `- **马星**：${DI_ZHI[hGZ.zhiIdx]}马在${maXingGong}宫\n`;
+  if (isFuYin) {
+    md += `- **伏吟**：${fuYin.gan.length?'干伏吟('+fuYin.gan.join(',')+'宫) ':''}${fuYin.xing.length?'星伏吟('+fuYin.xing.join(',')+'宫) ':''}${fuYin.men.length?'门伏吟('+fuYin.men.join(',')+'宫)':''}\n`;
+  }
+  md += `\n`;
+
+  md += `## 九宫格\n\n`;
+  md += `| 宫 | 八神 | 天盘 | 九星 | 八门 | 地盘 | 状态 |\n`;
+  md += `|---|------|------|------|------|------|------|\n`;
+  for (let g of GONG_ORDER) {
+    if (g === 5) {
+      md += `| 5 | — | — | — | — | ${diPan[5]||'戊'}寄坤 | — |\n`;
+      continue;
+    }
+    const s = siHai[g] || {};
+    let status = [];
+    if (s.both) status.push('入墓+击刑');
+    else { if (s.rumu) status.push('入墓'); if (s.jixing) status.push('击刑'); }
+    if (s.menpo) status.push('门迫');
+    if (getXunKong(g, xunShou.zhiStart)) status.push('空亡');
+    if (s.ganFuyin) status.push('干伏吟');
+    if (s.xingFuyin) status.push('星伏吟');
+    if (s.menFuyin) status.push('门伏吟');
+    if (g === maXingGong) status.push('马星');
+    if (g === zhiFuGong) status.push('值符');
+    md += `| ${g} | ${shenMap[g]||''} | ${tianPan[g]||''} | ${xingMap[g]||''} | ${menMap[g]||''}门 | ${diPan[g]||''} | ${status.join('、')||'—'} |\n`;
+  }
+  md += `\n`;
+
+  md += `## 四害与格局\n\n`;
+  let hasSiHai = false;
+  for (let g=1; g<=9; g++) {
+    if (g===5) continue;
+    const s = siHai[g];
+    if (!s) continue;
+    let badges = [];
+    if (s.both) badges.push('入墓+击刑');
+    else { if (s.rumu) badges.push('入墓'); if (s.jixing) badges.push('击刑'); }
+    if (s.menpo) badges.push('门迫');
+    if (getXunKong(g, xunShou.zhiStart)) badges.push('空亡');
+    if (s.ganFuyin) badges.push('干伏吟');
+    if (s.xingFuyin) badges.push('星伏吟');
+    if (s.menFuyin) badges.push('门伏吟');
+    if (badges.length) { md += `- ${g}宫：${badges.join('、')}\n`; hasSiHai = true; }
+  }
+  if (!hasSiHai) md += '本局无明显四害，格局较清\n';
+  md += `\n`;
+
+  md += `## 占断摘要\n\n`;
+  if (isFuYin) {
+    md += `> ⚠️ 伏吟局：${fuYin.gan.length?'干伏吟':''}${fuYin.xing.length?'星伏吟':''}${fuYin.men.length?'门伏吟':''} — 主迟滞，利静不利动\n\n`;
+  }
+  if (maXingGong) {
+    md += `- 马星在${maXingGong}宫，主奔波、变动、远行\n`;
+  }
+  md += `\n`;
+  md += `---\n*排盘时间：${dateFmt} ${timeFmt}*\n`;
+  return md;
+}
+
+function saveObsidian(mode) {
+  const md = generateMarkdown();
+  const d = window._panData;
+  const dateFmt = d ? `${d.date.getFullYear()}-${String(d.date.getMonth()+1).padStart(2,'0')}-${String(d.date.getDate()).padStart(2,'0')}` : '排盘';
+  const filename = `奇门排盘-${dateFmt}.md`;
+
+  if (mode === 'download') {
+    const blob = new Blob([md], {type:'text/markdown;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } else if (mode === 'image') {
+    drawQimenImage(dateFmt);
+  } else if (mode === 'uri') {
+    const encoded = encodeURIComponent(md);
+    if (encoded.length > 3000) {
+      alert('内容较长，Obsidian URI 可能截断。建议先「复制 Markdown」，然后在 Obsidian 中粘贴。');
+      navigator.clipboard.writeText(md).then(() => console.log('已复制'));
+      return;
+    }
+    window.open(`obsidian://new?vault=&file=${encodeURIComponent(filename)}&content=${encoded}`, '_blank');
+  } else if (mode === 'clipboard') {
+    navigator.clipboard.writeText(md).then(() => alert('Markdown 已复制到剪贴板')).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = md; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert('Markdown 已复制到剪贴板');
+    });
+  }
+}
+
+// ========== Canvas 绘制九宫格图片 ==========
+function drawQimenImage(dateFmt) {
+  const d = window._panData;
+  if (!d) { alert('请先排盘'); return; }
+  const { date, hour, minute, yearStr, monthStr, dayStr, hourStr, lunar, jieQi, isYang, dunStr, juShu, sanYuan, xunShou, xunKongZhi, zhiFuGong, maXingGong, isFuYin, fuYin, siHai, diPan, tianPan, xingMap, menMap, shenMap, yueZhiIdx, hGZ } = d;
+  const timeFmt = `${String(hour).padStart(2,'0')}:${String(minute).padStart(2,'0')}`;
+
+  const canvas = document.createElement('canvas');
+  const W = 600;
+  const GW = 180, GH = 180, M = 20, GAP = 4;
+
+  // 计算各部分高度
+  const titleH = 70;      // 标题 + 四柱
+  const infoH = 55;       // 信息标签行
+  const gridH = 3 * GH + 2 * GAP + 20; // 九宫格 + 标题
+  const readingH = 200;   // 占断摘要
+  const detailH = 280;    // 排盘详情
+  const footerH = 30;     // 底部
+  const H = titleH + infoH + gridH + readingH + detailH + footerH + M * 2;
+
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  let y = 0;
+
+  // ========== 背景 ==========
+  ctx.fillStyle = '#f5f0e8'; ctx.fillRect(0, 0, W, H);
+
+  // ========== 标题区 ==========
+  y = 15;
+  ctx.fillStyle = '#4a3c2a'; ctx.font = 'bold 20px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(`奇门遁甲排盘`, W/2, y + 20);
+  ctx.font = '12px "Microsoft YaHei", sans-serif'; ctx.fillStyle = '#8b7d6b';
+  ctx.fillText(`公历：${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${timeFmt}  |  ${dunStr}${juShu}局 · ${sanYuan}`, W/2, y + 42);
+  ctx.fillText(`农历：${lunar.ganZhi}年 ${lunar.monthStr}${lunar.dayStr}  |  四柱：${yearStr} ${monthStr} ${dayStr} ${hourStr}`, W/2, y + 58);
+
+  // ========== 信息标签行 ==========
+  y = titleH;
+  const tags = [
+    {label:'选局', value:`${dunStr}${juShu}局`},
+    {label:'旬首', value:`甲${DI_ZHI[xunShou.zhiStart]}${xunShou.yi}`},
+    {label:'值符', value:xingMap[zhiFuGong]||''},
+    {label:'值使', value:(menMap[zhiFuGong]||'')+'门'},
+    {label:'旬空', value:xunKongZhi},
+    {label:'马星', value:`${DI_ZHI[hGZ.zhiIdx]}马在${maXingGong}宫`},
+  ];
+  if (isFuYin) tags.push({label:'格局', value:`${fuYin.gan.length?'干伏':''}${fuYin.xing.length?'星伏':''}${fuYin.men.length?'门伏':''}`});
+  tags.push({label:'局式', value:'转盘-拆补-寄坤二宫'});
+
+  const tagW = Math.floor((W - M*2 - (tags.length-1)*6) / tags.length);
+  let tx = M;
+  for (let t of tags) {
+    // 标签背景
+    ctx.fillStyle = '#fff'; ctx.fillRect(tx, y, tagW, 45);
+    ctx.strokeStyle = '#e0d5c5'; ctx.lineWidth = 1;
+    ctx.strokeRect(tx, y, tagW, 45);
+    // 标签文字
+    ctx.fillStyle = '#8b7d6b'; ctx.font = '10px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(t.label, tx + tagW/2, y + 16);
+    ctx.fillStyle = '#4a3c2a'; ctx.font = 'bold 11px "Microsoft YaHei", sans-serif';
+    ctx.fillText(t.value, tx + tagW/2, y + 35);
+    tx += tagW + 6;
+  }
+
+  // ========== 九宫格标题 ==========
+  y = titleH + infoH + 10;
+  ctx.fillStyle = '#a08050'; ctx.font = 'bold 14px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('九宫格', M, y);
+
+  // ========== 九宫格 ==========
+  y = titleH + infoH + 25;
+  const pos = {4:[0,0], 9:[1,0], 2:[2,0], 3:[0,1], 5:[1,1], 7:[2,1], 8:[0,2], 1:[1,2], 6:[2,2]};
+  const gongList = [4,9,2,3,5,7,8,1,6];
+
+  for (let g of gongList) {
+    const [cx, cy] = pos[g];
+    const gx = M + cx * (GW + GAP), gy = y + cy * (GH + GAP);
+
+    // 宫格背景
+    ctx.fillStyle = '#fff'; ctx.fillRect(gx+1, gy+1, GW-2, GH-2);
+
+    // 边框
+    ctx.strokeStyle = '#e0d5c5'; ctx.lineWidth = 1;
+    ctx.strokeRect(gx, gy, GW, GH);
+
+    if (g === 5) {
+      ctx.fillStyle = '#a08050'; ctx.font = 'bold 28px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('5', gx + GW/2, gy + GH/2 - 5);
+      ctx.fillStyle = '#8b7d6b'; ctx.font = '13px "Microsoft YaHei", sans-serif';
+      ctx.fillText('中宫', gx + GW/2, gy + GH/2 + 20);
+      ctx.fillText(`${diPan[5]||'戊'}寄坤二`, gx + GW/2, gy + GH/2 + 40);
+      continue;
+    }
+
+    const s = siHai[g] || {};
+    const isZhiFu = g === zhiFuGong;
+    const isMaXing = g === maXingGong;
+    const isXunKong = getXunKong(g, xunShou.zhiStart);
+
+    // 高亮边框（值符宫）
+    if (isZhiFu) {
+      ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 3;
+      ctx.strokeRect(gx+1, gy+1, GW-2, GH-2);
+    }
+    // 伏吟背景色
+    else if (s.ganFuyin || s.xingFuyin || s.menFuyin) {
+      ctx.fillStyle = '#fff8f0'; ctx.fillRect(gx+1, gy+1, GW-2, GH-2);
+    }
+
+    // 宫号（左上角）
+    ctx.fillStyle = '#a08050'; ctx.font = 'bold 14px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText(String(g), gx + 8, gy + 20);
+
+    // 八神（顶部居中）
+    ctx.fillStyle = '#5a3c20'; ctx.font = 'bold 14px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(shenMap[g] || '', gx + GW/2, gy + 20);
+
+    // 天盘干（右上）
+    ctx.fillStyle = '#c0392b'; ctx.font = 'bold 24px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(tianPan[g] || '', gx + GW - 10, gy + 50);
+
+    // 地盘干（左上）
+    ctx.fillStyle = '#2980b9'; ctx.font = 'bold 16px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText(diPan[g] || '', gx + 10, gy + 50);
+
+    // 九星（中间）
+    ctx.fillStyle = '#e67e22'; ctx.font = 'bold 13px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(xingMap[g] || '', gx + GW/2, gy + GH/2 + 8);
+
+    // 八门（底部）
+    ctx.fillStyle = '#27ae60'; ctx.font = 'bold 13px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText((menMap[g] || '') + '门', gx + GW/2, gy + GH - 15);
+
+    // 标记（右上角小标记）
+    let marks = [];
+    if (s.both) marks.push('墓刑');
+    else { if (s.rumu) marks.push('墓'); if (s.jixing) marks.push('刑'); }
+    if (s.menpo) marks.push('迫');
+    if (isXunKong) marks.push('空');
+    if (s.ganFuyin) marks.push('干伏');
+    if (s.xingFuyin) marks.push('星伏');
+    if (s.menFuyin) marks.push('门伏');
+    if (isMaXing) marks.push('马');
+    if (isZhiFu) marks.push('符');
+
+    if (marks.length) {
+      ctx.fillStyle = '#8e44ad'; ctx.font = '10px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'right';
+      ctx.fillText(marks.join(' '), gx + GW - 8, gy + 35);
+    }
+  }
+
+  // ========== 占断摘要 ==========
+  y = titleH + infoH + gridH + 35;
+  ctx.fillStyle = '#a08050'; ctx.font = 'bold 14px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('占断摘要', M, y);
+  ctx.fillStyle = '#e0d5c5'; ctx.fillRect(M, y + 5, W - M*2, 1); // 分隔线
+
+  y += 25;
+  ctx.fillStyle = '#4a3c2a'; ctx.font = '13px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'left';
+
+  if (isFuYin) {
+    ctx.fillStyle = '#c0392b'; ctx.font = 'bold 13px "Microsoft YaHei", sans-serif';
+    ctx.fillText(`⚠️ 伏吟局：${fuYin.gan.length?'干伏吟':''}${fuYin.xing.length?'星伏吟':''}${fuYin.men.length?'门伏吟':''} — 主迟滞，利静不利动`, M, y);
+    y += 22;
+  }
+
+  // 四害列表
+  let hasSiHai = false;
+  for (let g=1; g<=9; g++) {
+    if (g===5) continue;
+    const s = siHai[g];
+    if (!s) continue;
+    let badges = [];
+    if (s.both) badges.push('入墓+击刑');
+    else { if (s.rumu) badges.push('入墓'); if (s.jixing) badges.push('击刑'); }
+    if (s.menpo) badges.push('门迫');
+    if (getXunKong(g, xunShou.zhiStart)) badges.push('空亡');
+    if (s.ganFuyin) badges.push('干伏吟');
+    if (s.xingFuyin) badges.push('星伏吟');
+    if (s.menFuyin) badges.push('门伏吟');
+    if (badges.length) {
+      ctx.fillStyle = '#4a3c2a'; ctx.font = '13px "Microsoft YaHei", sans-serif';
+      ctx.fillText(`${g}宫：${badges.join('、')}`, M, y);
+      y += 20;
+      hasSiHai = true;
+    }
+  }
+  if (!hasSiHai) {
+    ctx.fillStyle = '#27ae60'; ctx.font = 'bold 13px "Microsoft YaHei", sans-serif';
+    ctx.fillText('✓ 本局无明显四害，格局较清', M, y);
+    y += 20;
+  }
+
+  if (maXingGong) {
+    ctx.fillStyle = '#4a3c2a'; ctx.font = '13px "Microsoft YaHei", sans-serif';
+    ctx.fillText(`马星在${maXingGong}宫，主奔波、变动、远行`, M, y);
+    y += 20;
+  }
+
+  // ========== 排盘详情 ==========
+  y += 10;
+  ctx.fillStyle = '#a08050'; ctx.font = 'bold 14px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('排盘详情', M, y);
+  ctx.fillStyle = '#e0d5c5'; ctx.fillRect(M, y + 5, W - M*2, 1);
+
+  y += 25;
+  ctx.fillStyle = '#4a3c2a'; ctx.font = '12px "Microsoft YaHei", sans-serif';
+  const details = [
+    `公历：${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${timeFmt}`,
+    `农历：${lunar.ganZhi}年 ${lunar.monthStr}${lunar.dayStr}`,
+    `四柱：${yearStr} ${monthStr} ${dayStr} ${hourStr}`,
+    `节气：${jieQi.name}（${isYang?'阳遁':'阴遁'}）`,
+    `用局：${dunStr}${juShu}局 · ${sanYuan}`,
+    `旬首：甲${DI_ZHI[xunShou.zhiStart]}（${xunShou.yi}）`,
+    `旬空：${xunKongZhi}`,
+    `值符：${xingMap[zhiFuGong]||''}（落${zhiFuGong}宫）`,
+    `值使：${menMap[zhiFuGong]||''}门（落${zhiFuGong}宫）`,
+    `马星：${DI_ZHI[hGZ.zhiIdx]}马在${maXingGong}宫`,
+  ];
+  if (isFuYin) {
+    details.push(`伏吟：${fuYin.gan.length?'干伏吟('+fuYin.gan.join(',')+'宫) ':''}${fuYin.xing.length?'星伏吟('+fuYin.xing.join(',')+'宫) ':''}${fuYin.men.length?'门伏吟('+fuYin.men.join(',')+'宫)':''}`);
+  }
+  for (let line of details) {
+    ctx.fillText(line, M, y);
+    y += 20;
+  }
+
+  // ========== 底部 ==========
+  y += 10;
+  ctx.fillStyle = '#999'; ctx.font = '10px "Microsoft YaHei", sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('排盘内容仅供娱乐，请客观科学看待，抵制封建迷信', W/2, y);
+
+  // 下载
+  const link = document.createElement('a');
+  link.download = `奇门排盘-${dateFmt}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+</script>
+</body>
+</html>

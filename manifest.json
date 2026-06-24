@@ -1,0 +1,18 @@
+{
+  "name": "奇门遁甲排盘",
+  "short_name": "奇门排盘",
+  "description": "专业的奇门遁甲在线排盘工具，支持转盘、拆补法、四害检测、伏吟判断等",
+  "start_url": "qimen-pan.html",
+  "display": "standalone",
+  "background_color": "#f5f0e8",
+  "theme_color": "#a08050",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
